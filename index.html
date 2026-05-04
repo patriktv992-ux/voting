@@ -2,35 +2,140 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Vote</title>
+<title>Stream návrhy - Made by Xentrix</title>
+
 <style>
 body{
+    margin:0;
+    font-family:Arial;
     background:#0f0f0f;
     color:white;
-    font-family:Arial;
-    text-align:center;
-    padding-top:100px;
 }
-button{
-    padding:20px;
-    font-size:20px;
+
+.container{
+    width:600px;
+    margin:auto;
+    padding-top:40px;
+}
+
+.card{
+    background:#1c1c1c;
+    padding:15px;
+    margin:10px 0;
+    border-radius:12px;
+    transition:0.2s;
+}
+
+.card:hover{
+    transform:scale(1.02);
+}
+
+input{
+    width:80%;
+    padding:10px;
     border:none;
-    border-radius:10px;
+    border-radius:8px;
+}
+
+button{
+    padding:10px 15px;
+    border:none;
+    border-radius:8px;
     cursor:pointer;
     background:#4caf50;
     color:white;
 }
+
+.status{
+    font-size:12px;
+    padding:4px 8px;
+    border-radius:6px;
+    display:inline-block;
+}
+
+.ok{background:green;}
+.wait{background:orange;}
+
+.top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
 </style>
+
 </head>
 <body>
 
-<h1>🗳 Hlasování o streamu</h1>
+<div class="container">
 
-<p>Klikni a hlasuj 👇</p>
+<div class="top">
+<h2>🎥 Stream návrhy</h2>
+<a href="admin.html" style="color:#aaa">Admin</a>
+</div>
 
-<a href="http://78.40.210.3:4162" target="_blank">
-    <button>Otevřít hlasování</button>
-</a>
+<input id="text" placeholder="Napiš návrh...">
+<button onclick="send()">Odeslat</button>
+
+<br><br>
+
+<div id="list"></div>
+
+</div>
+
+<script>
+
+// 🔥 POSLAT NÁVRH NA HELKOR API
+async function send(){
+    let text = document.getElementById("text").value;
+
+    await fetch("http://TVŮJ-HELKOR/api.php", {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({text:text})
+    });
+
+    document.getElementById("text").value = "";
+    load();
+}
+
+// 🔥 NAČÍTÁNÍ DAT
+async function load(){
+    let res = await fetch("http://TVŮJ-HELKOR/api.php");
+    let data = await res.json();
+
+    let html = "";
+
+    data.forEach(row=>{
+        html += `
+        <div class="card">
+            <b>${escapeHtml(row.text)}</b>
+            <br><br>
+
+            <span class="status ${row.approved==1 ? "ok":"wait"}">
+                ${row.approved==1 ? "SCHVÁLENO" : "ČEKÁ NA SCHVÁLENÍ"}
+            </span>
+        </div>`;
+    });
+
+    document.getElementById("list").innerHTML = html;
+}
+
+// 🔒 anti XSS
+function escapeHtml(text){
+    return text.replace(/[<>"']/g, function(m){
+        return ({
+            '<':'&lt;',
+            '>':'&gt;',
+            '"':'&quot;',
+            "'":'&#039;'
+        })[m];
+    });
+}
+
+load();
+setInterval(load,3000);
+
+</script>
 
 </body>
 </html>
