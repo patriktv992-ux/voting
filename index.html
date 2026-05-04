@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Stream návrhy - Made by Xentrix</title>
+<title>Stream návrhy</title>
 
 <style>
 body{
@@ -23,15 +23,10 @@ body{
     padding:15px;
     margin:10px 0;
     border-radius:12px;
-    transition:0.2s;
-}
-
-.card:hover{
-    transform:scale(1.02);
 }
 
 input{
-    width:80%;
+    width:75%;
     padding:10px;
     border:none;
     border-radius:8px;
@@ -69,14 +64,16 @@ button{
 <div class="container">
 
 <div class="top">
-<h2>🎥 Stream návrhy</h2>
-<a href="admin.html" style="color:#aaa">Admin</a>
+    <h2>🎥 Stream návrhy</h2>
+    <a href="admin.html" style="color:#aaa">Admin</a>
 </div>
 
-<input id="text" placeholder="Napiš návrh...">
-<button onclick="send()">Odeslat</button>
+<form onsubmit="send(event)">
+    <input id="text" placeholder="Napiš návrh...">
+    <button>Odeslat</button>
+</form>
 
-<br><br>
+<br>
 
 <div id="list"></div>
 
@@ -84,23 +81,28 @@ button{
 
 <script>
 
-// 🔥 POSLAT NÁVRH NA HELKOR API
-async function send(){
+const API = "http://78.40.210.3:4162/api.php"; 
+// ✔ HELKOR API HOTOVÉ
+
+async function send(e){
+    e.preventDefault();
+
     let text = document.getElementById("text").value;
 
-    await fetch("http://TVŮJ-HELKOR/api.php", {
+    await fetch(API, {
         method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({text:text})
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({text:text})
     });
 
     document.getElementById("text").value = "";
     load();
 }
 
-// 🔥 NAČÍTÁNÍ DAT
 async function load(){
-    let res = await fetch("http://TVŮJ-HELKOR/api.php");
+    let res = await fetch(API);
     let data = await res.json();
 
     let html = "";
@@ -120,20 +122,17 @@ async function load(){
     document.getElementById("list").innerHTML = html;
 }
 
-// 🔒 anti XSS
 function escapeHtml(text){
-    return text.replace(/[<>"']/g, function(m){
-        return ({
-            '<':'&lt;',
-            '>':'&gt;',
-            '"':'&quot;',
-            "'":'&#039;'
-        })[m];
-    });
+    return text.replace(/[<>"']/g, m => ({
+        '<':'&lt;',
+        '>':'&gt;',
+        '"':'&quot;',
+        "'":'&#039;'
+    }[m]));
 }
 
 load();
-setInterval(load,3000);
+setInterval(load, 2000);
 
 </script>
 
