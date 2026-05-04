@@ -1,32 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Admin panel - Stream návrhy</title>
+
+<style>
+body{
+    margin:0;
+    font-family:Arial;
+    background:#0f0f0f;
+    color:white;
+}
+
+.container{
+    width:700px;
+    margin:auto;
+    padding-top:40px;
+}
+
+.card{
+    background:#1c1c1c;
+    padding:15px;
+    margin:10px 0;
+    border-radius:12px;
+    transition:0.2s;
+}
+
+.card:hover{
+    transform:scale(1.02);
+}
+
+.top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+button{
+    padding:8px 12px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    margin-right:5px;
+}
+
+.approve{
+    background:#4caf50;
+    color:white;
+}
+
+.delete{
+    background:#e53935;
+    color:white;
+}
+
+.status{
+    font-size:12px;
+    padding:4px 8px;
+    border-radius:6px;
+    display:inline-block;
+}
+
+.ok{background:green;}
+.wait{background:orange;}
+</style>
+
+</head>
+<body>
+
+<div class="container">
+
+<div class="top">
+    <h2>🛠 Admin panel</h2>
+    <a href="index.html" style="color:#aaa">← zpět</a>
+</div>
+
+<div id="list"></div>
+
+</div>
+
 <script>
 
-const API = "api.php";
+const API = "http://78.40.210.3:4162/api.php"; 
+// 👆 SEM DEJ SVOU IP NEBO DOMÉNU HELKORU
 
-// 🔥 načítání dat (jen list, žádný reload stránky)
+// 🔥 načítání dat
 async function load(){
-    let res = await fetch(API + "?admin=1");
-    let data = await res.json();
+    try {
+        let res = await fetch(API + "?admin=1");
+        let data = await res.json();
 
-    let html = "";
+        let html = "";
 
-    data.forEach(row=>{
-        html += `
-        <div class="card">
-            <b>${escapeHtml(row.text)}</b>
-            <br><br>
+        data.forEach(row=>{
+            html += `
+            <div class="card">
+                <b>${escapeHtml(row.text)}</b>
+                <br><br>
 
-            <span class="status ${row.approved==1 ? "ok":"wait"}">
-                ${row.approved==1 ? "SCHVÁLENO" : "ČEKÁ NA SCHVÁLENÍ"}
-            </span>
+                <span class="status ${row.approved==1 ? "ok":"wait"}">
+                    ${row.approved==1 ? "SCHVÁLENO" : "ČEKÁ NA SCHVÁLENÍ"}
+                </span>
 
-            <br><br>
+                <br><br>
 
-            <button class="approve" onclick="approve(${row.id})">Schválit</button>
-            <button class="delete" onclick="del(${row.id})">Smazat</button>
-        </div>`;
-    });
+                <button class="approve" onclick="approve(${row.id})">Schválit</button>
+                <button class="delete" onclick="del(${row.id})">Smazat</button>
+            </div>`;
+        });
 
-    document.getElementById("list").innerHTML = html;
+        document.getElementById("list").innerHTML = html;
+
+    } catch(e){
+        document.getElementById("list").innerHTML =
+        "<p>❌ Chyba načítání API</p>";
+    }
 }
 
 // ✔ schválit
@@ -41,7 +129,7 @@ async function del(id){
     load();
 }
 
-// 🔒 bezpečný text
+// 🔒 ochrana textu
 function escapeHtml(text){
     return text.replace(/[<>"']/g, m => ({
         '<':'&lt;',
@@ -51,8 +139,11 @@ function escapeHtml(text){
     }[m]));
 }
 
-// ⚡ LIVE REFRESH (STEJNÝ JAKO HELKOR)
+// ⚡ realtime refresh
 load();
-setInterval(load, 2000); // každé 2 sekundy
+setInterval(load, 2000);
 
 </script>
+
+</body>
+</html>
