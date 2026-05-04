@@ -23,10 +23,15 @@ body{
     padding:15px;
     margin:10px 0;
     border-radius:12px;
+    transition:0.2s;
+}
+
+.card:hover{
+    transform:scale(1.02);
 }
 
 input{
-    width:75%;
+    width:80%;
     padding:10px;
     border:none;
     border-radius:8px;
@@ -64,8 +69,8 @@ button{
 <div class="container">
 
 <div class="top">
-    <h2>🎥 Stream návrhy</h2>
-    <a href="admin.html" style="color:#aaa">Admin</a>
+<h2>🎥 Stream návrhy</h2>
+<a href="admin.html" style="color:#aaa">Admin</a>
 </div>
 
 <form onsubmit="send(event)">
@@ -80,27 +85,29 @@ button{
 </div>
 
 <script>
+const API = "http://78.40.210.3:4162/api.php";
 
-const API = "http://78.40.210.3:4162/api.php"; 
-// ✔ HELKOR API HOTOVÉ
-
+// 📤 odeslat návrh
 async function send(e){
     e.preventDefault();
 
     let text = document.getElementById("text").value;
 
+    if(!text) return;
+
     await fetch(API, {
-        method:"POST",
+        method: "POST",
         headers: {
             "Content-Type": "application/json"
         },
-        body: JSON.stringify({text:text})
+        body: JSON.stringify({ text })
     });
 
     document.getElementById("text").value = "";
     load();
 }
 
+// 📥 načíst návrhy
 async function load(){
     let res = await fetch(API);
     let data = await res.json();
@@ -122,6 +129,7 @@ async function load(){
     document.getElementById("list").innerHTML = html;
 }
 
+// 🔒 ochrana
 function escapeHtml(text){
     return text.replace(/[<>"']/g, m => ({
         '<':'&lt;',
@@ -131,9 +139,9 @@ function escapeHtml(text){
     }[m]));
 }
 
+// 🔥 realtime refresh
 load();
 setInterval(load, 2000);
-
 </script>
 
 </body>
