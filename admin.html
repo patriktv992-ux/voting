@@ -1,0 +1,58 @@
+<script>
+
+const API = "api.php";
+
+// 🔥 načítání dat (jen list, žádný reload stránky)
+async function load(){
+    let res = await fetch(API + "?admin=1");
+    let data = await res.json();
+
+    let html = "";
+
+    data.forEach(row=>{
+        html += `
+        <div class="card">
+            <b>${escapeHtml(row.text)}</b>
+            <br><br>
+
+            <span class="status ${row.approved==1 ? "ok":"wait"}">
+                ${row.approved==1 ? "SCHVÁLENO" : "ČEKÁ NA SCHVÁLENÍ"}
+            </span>
+
+            <br><br>
+
+            <button class="approve" onclick="approve(${row.id})">Schválit</button>
+            <button class="delete" onclick="del(${row.id})">Smazat</button>
+        </div>`;
+    });
+
+    document.getElementById("list").innerHTML = html;
+}
+
+// ✔ schválit
+async function approve(id){
+    await fetch(API + "?approve=" + id);
+    load();
+}
+
+// ❌ smazat
+async function del(id){
+    await fetch(API + "?delete=" + id);
+    load();
+}
+
+// 🔒 bezpečný text
+function escapeHtml(text){
+    return text.replace(/[<>"']/g, m => ({
+        '<':'&lt;',
+        '>':'&gt;',
+        '"':'&quot;',
+        "'":'&#039;'
+    }[m]));
+}
+
+// ⚡ LIVE REFRESH (STEJNÝ JAKO HELKOR)
+load();
+setInterval(load, 2000); // každé 2 sekundy
+
+</script>
